@@ -49,9 +49,22 @@
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">ویرایش</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">جزییات</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">حذف</a>
+                    <a href="#" class="js-delete" data-category-id="@item.Id">حذف</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts{
+<script>
+    $(document).ready(function () {
+        $(".table").on("click", ".js-delete", function () {
+            var button = $(this);
+             if (confirm("Are you sure you want to delete?") == true) {
+                 window.location.href = '/Product/Delete/' + button.attr("data-category-id");
+             }
+        });
+    });
+</script>
+}

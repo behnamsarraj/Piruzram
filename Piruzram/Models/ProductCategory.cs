@@ -4,6 +4,7 @@ namespace Piruzram.Models
 {
     public class ProductCategory
     {
+        [Key]
         [Required]
         public int Id { get; set; }
         [Required]

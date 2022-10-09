@@ -52,7 +52,7 @@ namespace Piruzram.Controllers
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                CategoryName = _context.ProductCategories.FirstOrDefault(n => n.Id == product.Id).Name
+                CategoryName = _context.ProductCategories.FirstOrDefault(n => n.Id == product.ProductCateguryId).Name
             };
 
             return View(productViewModel);
@@ -128,14 +128,21 @@ namespace Piruzram.Controllers
                     Name = viewModel.Name,
                     Price = viewModel.Price,
                     Description = viewModel.Description,
-                    ProductCategory = new ProductCategory()
-                    {
-                        Id = viewModel.CategoryId,
-                        Name = viewModel.Name
-                    },
-                    ProductCateguryId = viewModel.CategoryId
+                    ProductCateguryId = viewModel.CategoryId,
+                    ProductCategory = _context.ProductCategories.FirstOrDefault(n => n.Id == viewModel.CategoryId),
+                    ApplicationUserId = Convert.ToString(_context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name).Id),
+                    ApplicationUser = _context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name)
+
+                };
+                Inventory inventory = new Inventory()
+                {
+                    ProductId = product.Id,
+                    Product = product,
+                    Count = 0
                 };
                 _context.Products.Add(product);
+                _context.Inventories.Add(inventory);
+
             }
             #endregion
             #region Edit Mode
@@ -146,7 +153,7 @@ namespace Piruzram.Controllers
                 product.Description = viewModel.Description;
                 product.Price = viewModel.Price;
                 product.ProductCateguryId = viewModel.CategoryId;
-
+                product.ProductCategory = _context.ProductCategories.FirstOrDefault(n => n.Id == viewModel.CategoryId);
                 _context.Update(product);
 
             }
