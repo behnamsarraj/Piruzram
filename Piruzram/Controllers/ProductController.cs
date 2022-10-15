@@ -26,7 +26,8 @@ namespace Piruzram.Controllers
                     Name = product.Name,
                     Description = product.Description,
                     Price = product.Price,
-                    CategoryName = product.ProductCategory.Name
+                    CategoryName = product.ProductCategory.Name,
+                    ProductImages = _context.ProductImages.Where(n => n.ProductId == product.Id).ToList<ProductImage>(),
                 };
                 productViewModel.Add(viewModel);
             }
@@ -52,7 +53,9 @@ namespace Piruzram.Controllers
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                CategoryName = _context.ProductCategories.FirstOrDefault(n => n.Id == product.ProductCateguryId).Name
+                CategoryName = _context.ProductCategories.FirstOrDefault(n => n.Id == product.ProductCateguryId).Name,
+                ProductImages = _context.ProductImages.Where(n => n.ProductId == id).ToList<ProductImage>()
+
             };
 
             return View(productViewModel);
@@ -94,7 +97,9 @@ namespace Piruzram.Controllers
                 Price = product.Price,
                 CategoryId = product.ProductCategory.Id,
                 CategoryName = product.ProductCategory.Name,
-                CategoriesDropDown = categoriesDropDown
+                CategoriesDropDown = categoriesDropDown,
+                ProductImages = _context.ProductImages.Where(n => n.ProductId == id).ToList<ProductImage>(),
+
             };
 
             return View("Form", productModel);
@@ -115,11 +120,12 @@ namespace Piruzram.Controllers
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> Save(int id, ProductViewModel viewModel)
         {
+            /*
             if (!ModelState.IsValid)
             {
                 return View("Form", viewModel);
             }
-
+            */
             #region Add Mode
             if (viewModel.Id == 0)
             {
@@ -134,14 +140,7 @@ namespace Piruzram.Controllers
                     ApplicationUser = _context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name)
 
                 };
-                Inventory inventory = new Inventory()
-                {
-                    ProductId = product.Id,
-                    Product = product,
-                    Count = 0
-                };
                 _context.Products.Add(product);
-                _context.Inventories.Add(inventory);
 
             }
             #endregion
@@ -149,13 +148,17 @@ namespace Piruzram.Controllers
             else
             {
                 Product product = await _context.Products.FindAsync(viewModel.Id);
+                product.Images = await _context.ProductImages.Where(n => n.ProductId == viewModel.Id).ToArrayAsync();
                 product.Name = viewModel.Name;
                 product.Description = viewModel.Description;
                 product.Price = viewModel.Price;
                 product.ProductCateguryId = viewModel.CategoryId;
                 product.ProductCategory = _context.ProductCategories.FirstOrDefault(n => n.Id == viewModel.CategoryId);
+                product.Images = viewModel.ProductImages;
                 _context.Update(product);
+                
 
+                
             }
 
             #endregion
@@ -164,5 +167,12 @@ namespace Piruzram.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        
+        public ProductViewModel AddPicture (ProductViewModel viewModel)
+        {
+            viewModel.ProductImages.Add(new ProductImage());
+            return viewModel;
+        }
     }
 }

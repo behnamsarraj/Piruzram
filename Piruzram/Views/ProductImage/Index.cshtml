@@ -1,0 +1,52 @@
+﻿@using Piruzram.ViewModel
+@model IEnumerable<ProductImageViewModel>
+
+
+@{
+    ViewData["Title"] = "تصاویر";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h1>خانه</h1>
+
+<p>
+    <a asp-action="Create">جدید</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageAddress)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <img src=@Html.DisplayFor(modelItem => item.ImageAddress)><img/>
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">ویرایش</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">جزییات</a> |
+                    <a href="#" class="js-delete" data-category-id="@item.Id">حذف</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{
+<script>
+    $(document).ready(function () {
+        $(".table").on("click", ".js-delete", function () {
+            var button = $(this);
+             if (confirm("Are you sure you want to delete?") == true) {
+                 window.location.href = '/Product/Delete/' + button.attr("data-category-id");
+             }
+        });
+    });
+</script>
+}

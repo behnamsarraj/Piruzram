@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Piruzram.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace Piruzram.ViewModel
@@ -25,6 +26,8 @@ namespace Piruzram.ViewModel
         public List<SelectListItem>? CategoriesDropDown { get; set; }
 
         public int Inventory { get; set; }
+        public List<ProductImage> ProductImages { get; set; }
+
 
     }
 }

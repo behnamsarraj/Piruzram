@@ -16,8 +16,8 @@
         <form asp-action="Save">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                
-                <input asp-for="Id" class="form-control" hidden/>
+
+                <input asp-for="Id" class="form-control" hidden />
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
@@ -35,6 +35,18 @@
                     <option>Please select one</option>
                 </select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
+                @if (Model.Id != 0)
+                {
+                    for (var i = 0; i < Model.ProductImages.Count(); i++)
+                    {
+                        <label asp-for="@Model.ProductImages[i].ImageAddress" class="control-label"></label>
+                        <input asp-for="@Model.ProductImages[i].ImageAddress" class="form-control" />
+                        <span asp-validation-for="@Model.ProductImages[i].ImageAddress" class="text-danger"></span>
+                    }
+                    <a asp-action="Details">جزییات</a>
+                    <a value="افزودن تصویر" class="btn btn-primary AddPhoto"><i class="bi bi-plus"></i></a>
+                }
+
             </div>
             <div class="form-group">
                 <input type="submit" value="ذخیره" class="btn btn-primary" />
@@ -49,6 +61,15 @@
 
 @section Scripts {
     @{
-    await Html.RenderPartialAsync("_ValidationScriptsPartial");
-}
-}
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+            $(document).ready(function () {
+                $(".table").on("click", ".AddPhoto", function () {
+                    var button = $(this);
+                    
+                    $("p").append("Some appended text.");
+                });
+            });
+        </script>
+    }
