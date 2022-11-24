@@ -5,6 +5,11 @@ namespace Piruzram.Models
 {
     public class Product
     {
+        public Product()
+        {
+            Images = new List<ProductImage>();
+        }
+
         [Key]
         [Required]
         public int Id { get; set; }

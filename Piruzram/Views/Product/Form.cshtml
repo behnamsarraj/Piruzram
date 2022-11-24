@@ -13,7 +13,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Save">
+        <form asp-action="Save" id="form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
 
@@ -35,18 +35,18 @@
                     <option>Please select one</option>
                 </select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
-                @if (Model.Id != 0)
-                {
-                    for (var i = 0; i < Model.ProductImages.Count(); i++)
-                    {
-                        <label asp-for="@Model.ProductImages[i].ImageAddress" class="control-label"></label>
-                        <input asp-for="@Model.ProductImages[i].ImageAddress" class="form-control" />
-                        <span asp-validation-for="@Model.ProductImages[i].ImageAddress" class="text-danger"></span>
-                    }
-                    <a asp-action="Details">جزییات</a>
-                    <a value="افزودن تصویر" class="btn btn-primary AddPhoto"><i class="bi bi-plus"></i></a>
-                }
+                <div id="productImagesContainer">
+                    @Html.EditorFor(Model => Model.ProductImages)
+                </div>
 
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-success" id="btnAdd">
+                    افزودن تصویر
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z" />
+                    </svg>
+                </button>
             </div>
             <div class="form-group">
                 <input type="submit" value="ذخیره" class="btn btn-primary" />
@@ -63,13 +63,42 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
     <script>
-            $(document).ready(function () {
-                $(".table").on("click", ".AddPhoto", function () {
-                    var button = $(this);
-                    
-                    $("p").append("Some appended text.");
-                });
+
+
+        $("#btnAdd").on('click',function() {
+            $.ajax({
+                async: true,
+                data: $('#form').serialize(),
+                type: "POST",
+                url: '/Product/AddProductImages',
+                success: function (partialView){
+                    console.log("partialView: " + partialView);
+                    $('#productImagesContainer').html(partialView);
+                }
             });
-        </script>
+        });
+    </script>
+
     }
+
+
+
+
+    @*
+        $('#form1').append('<input class="form-control valid" type="text" data-val="true" data-val-maxlength="The field ImageAddress must be a string or array type with a maximum length of '200'." data-val-maxlength-max="200" data-val-required="The ImageAddress field is required." id="ProductImages_1__ImageAddress" maxlength="200" name="ProductImages[1].ImageAddress" value="" aria-describedby="ProductImages_1__ImageAddress-error" aria-invalid="false">');
+        ('#form1').append("<input class='form-control valid' type='text'/>");
+
+
+        data-val:'true',
+        data-val-maxlength:"The field ImageAddress must be a string or array type with a maximum length of '200'.",
+        data-val-maxlength-max:"200",
+        data-val-required:"The ImageAddress field is required.",
+        id:"ProductImages_1__ImageAddress",
+        maxlength:"200",
+        name:"ProductImages[1].ImageAddress",
+        value:"",
+        aria-describedby:"ProductImages_1__ImageAddress-error",
+        aria-invalid:"false"
+    *@

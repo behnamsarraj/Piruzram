@@ -2,9 +2,9 @@
 
 #nullable disable
 
-namespace Piruzram.Data.Migrations
+namespace Piruzram.Migrations
 {
-    public partial class Init : Migration
+    public partial class EditApplicationUser2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

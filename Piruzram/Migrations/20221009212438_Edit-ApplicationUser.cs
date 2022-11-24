@@ -2,9 +2,9 @@
 
 #nullable disable
 
-namespace Piruzram.Data.Migrations
+namespace Piruzram.Migrations
 {
-    public partial class AddProductAndCategory : Migration
+    public partial class EditApplicationUser : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

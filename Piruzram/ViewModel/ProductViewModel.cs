@@ -6,6 +6,10 @@ namespace Piruzram.ViewModel
 {
     public class ProductViewModel
     {
+        public ProductViewModel()
+        {
+            ProductImages = new List<ProductImage>();
+        }
         public int Id { get; set; }
         [Required]
         [Display(Name = "نام محصول")]

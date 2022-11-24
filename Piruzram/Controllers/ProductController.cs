@@ -167,12 +167,12 @@ namespace Piruzram.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-        
-        public ProductViewModel AddPicture (ProductViewModel viewModel)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> AddProductImages([Bind("ProductImages")]ProductViewModel product)
         {
-            viewModel.ProductImages.Add(new ProductImage());
-            return viewModel;
+            product.ProductImages.Add(new ProductImage());
+            return PartialView("ProductImages", product);
         }
     }
 }

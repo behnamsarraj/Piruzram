@@ -9,11 +9,11 @@ using Piruzram.Data;
 
 #nullable disable
 
-namespace Piruzram.Data.Migrations
+namespace Piruzram.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220930081447_FixProductsName")]
-    partial class FixProductsName
+    [Migration("20221009213239_Edit-ApplicationUser-2")]
+    partial class EditApplicationUser2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -88,6 +88,10 @@ namespace Piruzram.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -139,6 +143,8 @@ namespace Piruzram.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -226,6 +232,49 @@ namespace Piruzram.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Piruzram.Models.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Carts");
+                });
+
+            modelBuilder.Entity("Piruzram.Models.Inventory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Count");
+
+                    b.ToTable("Inventories");
+                });
+
             modelBuilder.Entity("Piruzram.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -233,6 +282,10 @@ namespace Piruzram.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreateDateTime")
                         .HasColumnType("datetime2");
@@ -246,10 +299,6 @@ namespace Piruzram.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("PictureLocation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
@@ -260,6 +309,8 @@ namespace Piruzram.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ProductCategoryId");
 
@@ -307,21 +358,11 @@ namespace Piruzram.Data.Migrations
                     b.ToTable("ProductImages");
                 });
 
-            modelBuilder.Entity("Piruzram.ViewModel.ProductCategoryViewModel", b =>
+            modelBuilder.Entity("Piruzram.Models.ApplicationUser", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProductCategoryViewModel");
+                    b.HasDiscriminator().HasValue("ApplicationUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -375,13 +416,51 @@ namespace Piruzram.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Piruzram.Models.Cart", b =>
+                {
+                    b.HasOne("Piruzram.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("Carts")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("Piruzram.Models.Inventory", b =>
+                {
+                    b.HasOne("Piruzram.Models.Cart", "Cart")
+                        .WithMany("Inventories")
+                        .HasForeignKey("Count")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Piruzram.Models.Product", "Product")
+                        .WithMany("Inventories")
+                        .HasForeignKey("Count")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Cart");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Piruzram.Models.Product", b =>
                 {
+                    b.HasOne("Piruzram.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("Products")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Piruzram.Models.ProductCategory", "ProductCategory")
                         .WithMany("Products")
                         .HasForeignKey("ProductCategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("ProductCategory");
                 });
@@ -389,7 +468,7 @@ namespace Piruzram.Data.Migrations
             modelBuilder.Entity("Piruzram.Models.ProductImage", b =>
                 {
                     b.HasOne("Piruzram.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -397,8 +476,27 @@ namespace Piruzram.Data.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Piruzram.Models.Cart", b =>
+                {
+                    b.Navigation("Inventories");
+                });
+
+            modelBuilder.Entity("Piruzram.Models.Product", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("Inventories");
+                });
+
             modelBuilder.Entity("Piruzram.Models.ProductCategory", b =>
                 {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Piruzram.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Carts");
+
                     b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
