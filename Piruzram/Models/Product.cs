@@ -7,7 +7,7 @@ namespace Piruzram.Models
     {
         public Product()
         {
-            Images = new List<ProductImage>();
+            //Images = new List<ProductImage>();
         }
 
         [Key]
@@ -20,9 +20,9 @@ namespace Piruzram.Models
         public int Price { get; set; }
         public string Description { get; set; }
         public DateTime CreateDateTime { get; set; } = DateTime.Now;
-        public virtual string ApplicationUserId { get; set; }
-        [ForeignKey("ApplicationUserId")]
-        public virtual ApplicationUser ApplicationUser { get; set; }
+        //public virtual string ApplicationUserId { get; set; }
+        //[ForeignKey("ApplicationUserId")]
+        //public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual int ProductCateguryId { get; set; }
         [ForeignKey("ProductCategoryId")]
         public virtual ProductCategory ProductCategory { get; set; }

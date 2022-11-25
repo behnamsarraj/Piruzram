@@ -28,6 +28,7 @@ namespace Piruzram.Controllers
                     Price = product.Price,
                     CategoryName = product.ProductCategory.Name,
                     ProductImages = _context.ProductImages.Where(n => n.ProductId == product.Id).ToList<ProductImage>(),
+                    Count = _context.Inventories.Where(n => n.ProductId == product.Id).Sum(n => n.Count),
                 };
                 productViewModel.Add(viewModel);
             }
@@ -54,7 +55,8 @@ namespace Piruzram.Controllers
                 Description = product.Description,
                 Price = product.Price,
                 CategoryName = _context.ProductCategories.FirstOrDefault(n => n.Id == product.ProductCateguryId).Name,
-                ProductImages = _context.ProductImages.Where(n => n.ProductId == id).ToList<ProductImage>()
+                ProductImages = _context.ProductImages.Where(n => n.ProductId == id).ToList<ProductImage>(),
+                Count = _context.Inventories.Where(n => n.ProductId == product.Id).Sum(n => n.Count),
 
             };
 
@@ -136,8 +138,8 @@ namespace Piruzram.Controllers
                     Description = viewModel.Description,
                     ProductCateguryId = viewModel.CategoryId,
                     ProductCategory = _context.ProductCategories.FirstOrDefault(n => n.Id == viewModel.CategoryId),
-                    ApplicationUserId = Convert.ToString(_context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name).Id),
-                    ApplicationUser = _context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name)
+                    //ApplicationUserId = Convert.ToString(_context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name).Id),
+                    //ApplicationUser = _context.ApplicationUsers.FirstOrDefault(n => n.Email == User.Identity.Name)
 
                 };
                 _context.Products.Add(product);
@@ -156,9 +158,9 @@ namespace Piruzram.Controllers
                 product.ProductCategory = _context.ProductCategories.FirstOrDefault(n => n.Id == viewModel.CategoryId);
                 product.Images = viewModel.ProductImages;
                 _context.Update(product);
-                
 
-                
+
+
             }
 
             #endregion
@@ -169,7 +171,7 @@ namespace Piruzram.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> AddProductImages([Bind("ProductImages")]ProductViewModel product)
+        public async Task<ActionResult> AddProductImages([Bind("ProductImages")] ProductViewModel product)
         {
             product.ProductImages.Add(new ProductImage());
             return PartialView("ProductImages", product);

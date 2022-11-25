@@ -30,6 +30,8 @@ namespace Piruzram.ViewModel
         public List<SelectListItem>? CategoriesDropDown { get; set; }
 
         public int Inventory { get; set; }
+        [Display(Name = "موجودی")]
+        public int Count { get; set; }
         public List<ProductImage> ProductImages { get; set; }
 
 

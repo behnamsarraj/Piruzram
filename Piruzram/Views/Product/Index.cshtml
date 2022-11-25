@@ -27,6 +27,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.CategoryName)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Count)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -47,6 +50,9 @@
                     @Html.DisplayFor(modelItem => item.CategoryName)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.Count)
+                </td>
+                <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">ویرایش</a> |
                     <a asp-action="Details" asp-route-id="@item.Id">جزییات</a> |
                     <a href="#" class="js-delete" data-category-id="@item.Id">حذف</a>
@@ -57,14 +63,14 @@
 </table>
 
 @section Scripts{
-<script>
-    $(document).ready(function () {
-        $(".table").on("click", ".js-delete", function () {
-            var button = $(this);
-             if (confirm("Are you sure you want to delete?") == true) {
-                 window.location.href = '/Product/Delete/' + button.attr("data-category-id");
-             }
+    <script>
+        $(document).ready(function () {
+            $(".table").on("click", ".js-delete", function () {
+                var button = $(this);
+                 if (confirm("Are you sure you want to delete?") == true) {
+                     window.location.href = '/Product/Delete/' + button.attr("data-category-id");
+                 }
+            });
         });
-    });
-</script>
+    </script>
 }

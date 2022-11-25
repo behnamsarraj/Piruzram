@@ -18,18 +18,19 @@ namespace Piruzram.Data
         {
             base.OnModelCreating(builder);
             builder.Entity<ApplicationUser>();
-
+            /*
             builder.Entity<Inventory>()
             .HasOne(m => m.Product)
             .WithMany(m => m.Inventories).IsRequired()
             .HasForeignKey(m => m.Count)
             .OnDelete(DeleteBehavior.NoAction);
-
+            
             builder.Entity<Inventory>()
             .HasOne(m => m.Cart)
             .WithMany(m => m.Inventories).IsRequired()
             .HasForeignKey(m => m.Count)
             .OnDelete(DeleteBehavior.NoAction);
+            */
 
         }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
