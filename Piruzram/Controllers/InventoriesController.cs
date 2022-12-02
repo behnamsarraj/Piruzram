@@ -49,7 +49,7 @@ namespace Piruzram.Controllers
         // GET: Inventories/Create
         public IActionResult Create()
         {
-            ViewData["CartId"] = new SelectList(_context.Carts, "Id", "Id");
+            //ViewData["CartId"] = new SelectList(_context.Carts, "Id", "Id");
             ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Name");
             return View();
         }
@@ -59,11 +59,21 @@ namespace Piruzram.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductId,Count,CartId")] Inventory inventory)
+        public async Task<IActionResult> Create([Bind("Id,ProductId,Count")] Inventory inventory)
         {
-            if (inventory.CartId != null && inventory.ProductId != null)
+            inventory.Cart = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name).FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
+            if (inventory.Cart == null)
             {
-                inventory.Cart = _context.Carts.FirstOrDefault(n => n.Id == inventory.CartId);
+                CartsController cartsController = new CartsController(_context);
+                cartsController.LocalUser = User;
+                cartsController.Create();
+                IQueryable<Cart> carts = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name);
+                inventory.Cart = carts.FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
+
+            }
+            if (inventory.Cart != null && inventory.ProductId != null)
+            {
+                inventory.CartId = _context.Carts.FirstOrDefault(n => n == inventory.Cart).Id;
                 inventory.Product = _context.Products.FirstOrDefault(n => n.Id == inventory.ProductId);
                 _context.Add(inventory);
                 await _context.SaveChangesAsync();

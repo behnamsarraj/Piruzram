@@ -13,6 +13,7 @@ namespace Piruzram.Controllers
     public class CartsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        public System.Security.Claims.ClaimsPrincipal LocalUser { get; set; }
 
         public CartsController(ApplicationDbContext context)
         {
@@ -22,7 +23,9 @@ namespace Piruzram.Controllers
         // GET: Carts
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Carts.Include(c => c.ApplicationUser);
+            var applicationDbContext = _context.Carts
+                .Include(c => c.ApplicationUser)
+                .Where(n => n.ApplicationUser.Email == User.Identity.Name);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -45,30 +48,105 @@ namespace Piruzram.Controllers
             return View(cart);
         }
 
-        // GET: Carts/Create
-        public IActionResult Create()
-        {
-            ViewData["ApplicationUserId"] = new SelectList(_context.ApplicationUsers, "Id", "Id");
-            return View();
-        }
 
-        // POST: Carts/Create
+
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ApplicationUserId")] Cart cart)
+
+        public async Task<IActionResult> Create()
+        {
+            Cart cart = new Cart();
+            if (User != null)
+            {
+                LocalUser = User;
+            }
+            IQueryable<ApplicationUser> ApplicationUsers = _context.ApplicationUsers.Where(n => n.Email == LocalUser.Identity.Name);
+            cart.ApplicationUser = ApplicationUsers.FirstOrDefault();
+            if (cart.ApplicationUser == null)
+            {
+                return NotFound();
+            }
+
+            IQueryable<Cart> Carts = _context.Carts.Where(n => n.ApplicationUser.Email == LocalUser.Identity.Name);
+            foreach (Cart cartItem in Carts)
+            {
+                if (cartItem.Status == Enums.CartStatus.Active)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+
+            cart.ApplicationUserId = cart.ApplicationUser.Id;
+            cart.Status = Enums.CartStatus.Active;
+            _context.Add(cart);
+            _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+        // GET: Carts/Paid/5
+        public async Task<IActionResult> Paid(int? id)
         {
 
-            if (cart.ApplicationUserId != null)
+            if (id == null || _context.Carts == null)
             {
-                cart.ApplicationUser = _context.ApplicationUsers.FirstOrDefault(m => m.Id == cart.ApplicationUserId);
-                _context.Add(cart);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.ApplicationUsers, "Id", "Id", cart.ApplicationUserId);
-            return View(cart);
+            Cart cart = _context.Carts.FirstOrDefault(n => n.Id == id);
+            if (cart == null)
+            {
+                return NotFound();
+            }
+            cart.Status = Enums.CartStatus.Paid;
+            try
+            {
+                _context.Update(cart);
+                _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CartExists(cart.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        // GET: Carts/Cancel/5
+        public async Task<IActionResult> Cancel(int? id)
+        {
+
+            if (id == null || _context.Carts == null)
+            {
+                return NotFound();
+            }
+            Cart cart = _context.Carts.FirstOrDefault(n => n.Id == id);
+            if (cart == null)
+            {
+                return NotFound();
+            }
+            cart.Status = Enums.CartStatus.Canceled;
+            try
+            {
+                _context.Update(cart);
+                _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CartExists(cart.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Carts/Edit/5
@@ -157,14 +235,14 @@ namespace Piruzram.Controllers
             {
                 _context.Carts.Remove(cart);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CartExists(int id)
         {
-          return _context.Carts.Any(e => e.Id == id);
+            return _context.Carts.Any(e => e.Id == id);
         }
     }
 }
