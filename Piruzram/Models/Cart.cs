@@ -12,7 +12,7 @@ namespace Piruzram.Models
         public int Id { get; set; }
         public virtual string ApplicationUserId { get; set; }
         [ForeignKey("ApplicationUserId")]
-        public virtual ApplicationUser ApplicationUser { get; set; }
+        public virtual ApplicationUser? ApplicationUser { get; set; }
 
         public ICollection<Inventory> Inventories { get; set; }
 

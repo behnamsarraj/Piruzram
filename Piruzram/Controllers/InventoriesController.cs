@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Piruzram.Data;
 using Piruzram.Models;
+using Piruzram.Services;
 
 namespace Piruzram.Controllers
 {
     public class InventoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICartService _cartService;
 
-        public InventoriesController(ApplicationDbContext context)
+        public InventoriesController(ApplicationDbContext context, ICartService cartService)
         {
             _context = context;
+            _cartService = cartService;
         }
 
         // GET: Inventories
@@ -61,18 +64,14 @@ namespace Piruzram.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ProductId,Count")] Inventory inventory)
         {
+            if (User?.Identity?.Name is null)
+                return Unauthorized();
+            
             inventory.Cart = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name).FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
             if (inventory.Cart == null)
             {
-                RedirectToActionResult res = RedirectToAction("Create", "CartsController");
-                ActionContext actionContext = new ActionContext();
-                res.ExecuteResult(actionContext);
-                //CartsController cartsController = new CartsController(_context);
-                //cartsController.LocalUser = User;
-                //await cartsController.Create();
-                
-                IQueryable<Cart> carts = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name);
-                inventory.Cart = carts.FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
+                var cart = await _cartService.CreateCartAsync(User.Identity.Name);
+                inventory.Cart = cart;
 
             }
             if (inventory.Cart != null && inventory.ProductId != null)
