@@ -64,9 +64,13 @@ namespace Piruzram.Controllers
             inventory.Cart = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name).FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
             if (inventory.Cart == null)
             {
-                CartsController cartsController = new CartsController(_context);
-                cartsController.LocalUser = User;
-                cartsController.Create();
+                RedirectToActionResult res = RedirectToAction("Create", "CartsController");
+                ActionContext actionContext = new ActionContext();
+                res.ExecuteResult(actionContext);
+                //CartsController cartsController = new CartsController(_context);
+                //cartsController.LocalUser = User;
+                //await cartsController.Create();
+                
                 IQueryable<Cart> carts = _context.Carts.Where(n => n.ApplicationUser.Email == User.Identity.Name);
                 inventory.Cart = carts.FirstOrDefault(n => n.Status == Enums.CartStatus.Active);
 
