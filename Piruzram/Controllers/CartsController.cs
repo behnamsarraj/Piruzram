@@ -58,13 +58,7 @@ namespace Piruzram.Controllers
 
         public async Task<IActionResult> Create()
         {
-            if (User != null)
-            {
-                LocalUser = User; //CHERA????
-            }
-
-            // Hassan Code Here:
-            
+           
             if (User?.Identity?.Name is null)
                 return Unauthorized();
             
