@@ -7,17 +7,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Piruzram.Data;
 using Piruzram.Models;
+using Piruzram.Services;
 
 namespace Piruzram.Controllers
 {
     public class CartsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICartService _cartService;
         public System.Security.Claims.ClaimsPrincipal LocalUser { get; set; }
 
-        public CartsController(ApplicationDbContext context)
+        public CartsController(ApplicationDbContext context, ICartService cartService)
         {
             _context = context;
+            _cartService = cartService;
         }
 
         // GET: Carts
@@ -55,32 +58,17 @@ namespace Piruzram.Controllers
 
         public async Task<IActionResult> Create()
         {
-            Cart cart = new Cart();
             if (User != null)
             {
-                LocalUser = User;
-            }
-            IQueryable<ApplicationUser> ApplicationUsers = _context.ApplicationUsers.Where(n => n.Email == LocalUser.Identity.Name);
-            cart.ApplicationUser = ApplicationUsers.FirstOrDefault();
-            if (cart.ApplicationUser == null)
-            {
-                return NotFound();
+                LocalUser = User; //CHERA????
             }
 
-            IQueryable<Cart> Carts = _context.Carts.Where(n => n.ApplicationUser.Email == LocalUser.Identity.Name);
-            foreach (Cart cartItem in Carts)
-            {
-                if (cartItem.Status == Enums.CartStatus.Active)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-
-
-            cart.ApplicationUserId = cart.ApplicationUser.Id;
-            cart.Status = Enums.CartStatus.Active;
-            _context.Add(cart);
-            _context.SaveChangesAsync();
+            // Hassan Code Here:
+            
+            if (User?.Identity?.Name is null)
+                return Unauthorized();
+            
+            await _cartService.CreateCartAsync(User.Identity.Name);
 
             return RedirectToAction(nameof(Index));
         }
